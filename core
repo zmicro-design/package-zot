@@ -1,0 +1,52 @@
+#!/bin/bash
+
+install() {
+  log::info "[$(timestamp)][package][$name] preparing ..."
+
+  # get system os/arch
+  local arch="$PACKAGE_OS_ARCH"
+  local kernel="$PACKAGE_OS_KERNEL"
+  local platform="$PACKAGE_OS_PLATFORM"
+  # usr_bin_dir
+  local usr_bin_dir="$PACKAGE_USER_BIN_DIR"
+  local tmp_dir="$PACKAGE_TMP_DIR"
+
+  # prepare vars
+  local name="zot"
+  # files
+  local tmp_file="$name"
+  local bin_file="./$name"
+
+  # prepare context
+  cd $tmp_dir
+
+  # reference: https://github.com/project-zot/zot/releases
+  # example:
+  #   https://github.com/project-zot/zot/releases/download/v1.4.3-rc7/zot-darwin-amd64
+  #   https://github.com/project-zot/zot/releases/download/v1.4.3-rc7/zot-darwin-arm64
+  # generate url
+  local url="https://github.com/project-zot/zot/releases/download/$PACKAGE_CORE_VERSION/${name}-${platform}-${arch}"
+  log::debug "[$(timestamp)][package][$name][$kernel][$arch] url: $url, file: ${tmp_file}, tmp_dir: $tmp_dir"
+
+  # download
+  log::info "[$(timestamp)][package][$name] downloading ..."
+  os::download $tmp_file $url
+
+  # # extract
+  # log::info "[$(timestamp)][package][$name] extracting ..."
+  # os::extract $tmp_file
+
+  # make executable
+  log::info "[$(timestamp)][package][$name] making executable ..."
+  chmod 755 $bin_file
+
+  # install
+  log::info "[$(timestamp)][package][$name] installing ..."
+  sudo mv $bin_file $usr_bin_dir
+
+  # clean
+  log::info "[$(timestamp)][package][$name] cleaning ..."
+  rm -rf $tmp_dir
+}
+
+export -f install
